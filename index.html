@@ -1,0 +1,172 @@
+
+        <canvas id = "canvas" width = "400" height = "400"></canvas>
+
+        <script>
+
+            window.onload = function() {
+                //is game on
+                mode = 0;
+                start = 0;
+
+                //game statistics
+                deathcount = 0;
+                currentScore = 0;
+                highscore = 0;
+                
+                canvas = document.getElementById("canvas");
+                ctx = canvas.getContext("2d");
+                
+                document.addEventListener("keydown", keyDownEvent);
+
+                setInterval(game, 1000 / 10);
+            };
+
+            //initializing the snake
+            defaultTailSize = 3;
+            tailSize = defaultTailSize;
+            snakeTrail = [];
+            snakeX = snakeY = 15;
+
+            //initializing platform
+            gridSize = tileSize = 20;
+            nextX = nextY = 0;
+
+            //initializing apple (Change to fruits and implement random variance)
+            appleX = (appleY = 15);
+
+            function homeScreen () {
+                //paint background
+                ctx.fillStyle = "lightblue";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'green';
+                ctx.font = '35px san-serif';
+                ctx.fillText('Snake Game', 200, 200);
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'red';
+                ctx.font = '15px san-serif';
+                ctx.fillText('Press enter to start', 200, 300);
+            }
+
+            function game() {
+
+                if (mode == 0) {
+                    homeScreen();
+                }
+
+                if (mode == 1) {
+                //move snake to next pos
+                snakeX += nextX;
+                snakeY += nextY;
+
+                if (currentScore > highscore) {
+                    highscore = currentScore;
+                }
+
+                //paint background + statistics
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, canvas.width, canvas.height - 20);
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'white';
+                ctx.fillText('Score: ' + currentScore, 100, 15);
+
+                ctx.fillStyle = "lightblue";
+                ctx.fillRect(0, 380, canvas.width, canvas.height);
+
+                ctx.font = '15px garamond';
+                ctx.textAlign = 'right';
+                ctx.fillStyle = 'red';
+                ctx.fillText('Deaths: ' + deathcount, 100, 395);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = 'red';
+                ctx.fillText('Highscore: ' + highscore, 200, 395);
+
+                //Game over
+                if (snakeX < 0 || snakeX > tileSize - 1 || snakeY < 0 || snakeY > tileSize - 2){
+                    snakeX = randomSpawn(8,12);
+                    snakeY = snakeX;
+                    tailSize = 3;
+                    deathcount++;
+                    currentScore = 0;
+                }
+                
+                //paint snake
+                ctx.fillStyle = "green";
+            
+                for(var i=0;i<snakeTrail.length;i++) {
+
+                    ctx.fillRect(snakeTrail[i].x * gridSize, snakeTrail[i].y * gridSize, gridSize-2, gridSize-2);
+
+                    if(snakeTrail[i].x==snakeX && snakeTrail[i].y==snakeY) {
+
+                        if (start == 1) {
+                            deathcount++;
+                            currentScore = 0;
+                        }
+
+                        tailSize = 3;    
+
+                    }
+                }
+                
+                //set snake trail
+                snakeTrail.push({ x: snakeX, y: snakeY });
+            
+                while (snakeTrail.length > tailSize) {
+                    snakeTrail.shift();
+                }
+
+                //snake consumes apple to increase tailsize
+                if (snakeX == appleX && snakeY == appleY) {
+                    tailSize++;
+                    currentScore++;
+                    appleX = randomSpawn(0, 18);
+                    appleY = randomSpawn(0, 18);
+                }  
+
+                //paint apple
+                ctx.fillStyle = "red";
+                ctx.fillRect(appleX * tileSize, appleY * tileSize, tileSize, tileSize);
+            }
+        }
+
+        //random spawn inclusive
+        function randomSpawn(min, max) { 
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        //movement input
+        function keyDownEvent(e) {           
+                switch (e.keyCode) {
+                
+                case 13:
+                    mode = 1;
+                    break;
+                case 37:
+                    start = 1;
+                    nextX = -1;
+                    nextY = 0;
+                    break;
+                case 38:   
+                    start = 1;
+                    nextX = 0;
+                    nextY = -1;
+                    break;
+                case 39:
+                    start = 1;
+                    nextX = 1;
+                    nextY = 0;
+                    break;
+                case 40:
+                    start = 1;
+                    nextX = 0;
+                    nextY = 1;
+                    break;
+                }
+        }    
+
+    </script>
